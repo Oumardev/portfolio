@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="./script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <!-- Load mathjax -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML-full,Safe"> </script>
+      <!-- MathJax configuration -->
+      <script type="text/x-mathjax-config">
+      init_mathjax = function() {
+          if (window.MathJax) {
+          // MathJax loaded
+              MathJax.Hub.Config({
+                  TeX: {
+                      equationNumbers: {
+                      autoNumber: "AMS",
+                      useLabelIds: true
+                      }
+                  },
+                  tex2jax: {
+                      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+                      processEscapes: true,
+                      processEnvironments: true
+                  },
+                  displayAlign: 'center',
+                  CommonHTML: {
+                      linebreaks: { 
+                      automatic: true 
+                      }
+                  }
+              });
+          
+              MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+          }
+      }
+      init_mathjax();
+      </script>
+    <title>
+      Explication mathématique du fonctionnement perceptron
+    </title>
+    <meta name="description" content="Simple landind page" />
+    <meta name="keywords" content="" />
+    <link rel="shortcut icon" type="image/png" href="../images/icon.webp" />
+    <meta name="author" content="Oumar CISSE" />
+    <link rel="stylesheet" href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css"/>
+    <!--Replace with your tailwind.css once created-->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700" rel="stylesheet" />
+    <!-- Define your gradient here - use online tools to find a gradient matching your branding-->
+    <style>
+      .gradient {
+        background: linear-gradient(90deg, #be245a6b 0%, #daaf51cb 100%);
+      }
+    </style>
+  </head>
+  <body class="leading-normal tracking-normal text-white gradient" style="font-family: 'Source Sans Pro', sans-serif;">
+    <!--Nav-->
+    
+    <!--Hero-->
+    <div class="pt-24">
+      <div class="container px-3 mx-auto flex flex-wrap flex-col md:flex-row items-center">
+        <!--Left Col-->
+        <div class="flex flex-col w-full md:w-2/5 justify-center items-start text-center md:text-left">
+          <p class="uppercase tracking-loose w-full"></p>
+          <h1 class="my-4 text-5xl font-bold leading-tight">
+            Le fonctionnement du perceptron
+          </h1>
+          <p class="leading-normal text-2xl mb-8">
+            Oumar Alpha Yaya CISSE - 
+          </p>
+          <a href="https://www.oumardev.com/getiypnp" class="mx-auto lg:mx-0 hover:underline bg-white text-gray-800 font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out">
+            Télécharger l'article (.ipynb)
+          </a>
+        </div>
+        <!--Right Col-->
+        <div class="w-full md:w-3/5 py-6 text-center">
+          <img class="w-full md:w-4/5 z-50" src="./assets/perceptron.png" />
+        </div>
+      </div>
+    </div>
+    <div class="relative -mt-12 lg:-mt-24">
+      <svg viewBox="0 0 1428 174" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+          <g transform="translate(-2.000000, 44.000000)" fill="#FFFFFF" fill-rule="nonzero">
+            <path d="M0,0 C90.7283404,0.927527913 147.912752,27.187927 291.910178,59.9119003 C387.908462,81.7278826 543.605069,89.334785 759,82.7326078 C469.336065,156.254352 216.336065,153.6679 0,74.9732496" opacity="0.100000001"></path>
+            <path
+              d="M100,104.708498 C277.413333,72.2345949 426.147877,52.5246657 546.203633,45.5787101 C666.259389,38.6327546 810.524845,41.7979068 979,55.0741668 C931.069965,56.122511 810.303266,74.8455141 616.699903,111.243176 C423.096539,147.640838 250.863238,145.462612 100,104.708498 Z"
+              opacity="0.100000001"
+            ></path>
+            <path d="M1046,51.6521276 C1130.83045,29.328812 1279.08318,17.607883 1439,40.1656806 L1439,120 C1271.17211,77.9435312 1140.17211,55.1609071 1046,51.6521276 Z" id="Path-4" opacity="0.200000003"></path>
+          </g>
+          <g transform="translate(-4.000000, 76.000000)" fill="#FFFFFF" fill-rule="nonzero">
+            <path
+              d="M0.457,34.035 C57.086,53.198 98.208,65.809 123.822,71.865 C181.454,85.495 234.295,90.29 272.033,93.459 C311.355,96.759 396.635,95.801 461.025,91.663 C486.76,90.01 518.727,86.372 556.926,80.752 C595.747,74.596 622.372,70.008 636.799,66.991 C663.913,61.324 712.501,49.503 727.605,46.128 C780.47,34.317 818.839,22.532 856.324,15.904 C922.689,4.169 955.676,2.522 1011.185,0.432 C1060.705,1.477 1097.39,3.129 1121.236,5.387 C1161.703,9.219 1208.621,17.821 1235.4,22.304 C1285.855,30.748 1354.351,47.432 1440.886,72.354 L1441.191,104.352 L1.121,104.031 L0.457,34.035 Z"
+            ></path>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <section class="bg-white border-b py-8">
+      <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <h1 style="text-align: center;" id="EXPLICATION-MATHEMATIQUE-DU-FONCTIONNEMENT-DU-PERCEPTRON">EXPLICATION MATHEMATIQUE DU FONCTIONNEMENT DU PERCEPTRON<a class="anchor-link" href="#EXPLICATION-MATHEMATIQUE-DU-FONCTIONNEMENT-DU-PERCEPTRON">&#182;</a></h1>
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell img-title">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <p><img src="./assets/perceptron.png" alt="perceptron.JPG"></p>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <h2 id="D%C3%A9finition-et-histoire-du-perceptron">D&#233;finition du perceptron<a class="anchor-link" href="#D%C3%A9finition-et-histoire-du-perceptron">&#182;</a></h2>
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li><p>Il s'agit d'un <strong>percepton</strong> représentant un neurone artificiel. C'est un algorithme d'apprentissage supervisé de classifieurs binaires (c'est-à-dire séparant deux classes).</p>
+        </li>
+        <li><p>Le perceptron a n entrées $(x_1,...,x_n)$ et n'a qu'une seule sortie $y$ qui est booléenne.</p>
+        </li>
+        <li><p>Il existe plusieurs algorithmes d'apprentissage pour un perceptron l'algorithme utilisé dans cet article est la <strong>L'algorithme du gradient</strong>.</p>
+        </li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <h2 id="Analysons-l'image">Analysons l'image<a class="anchor-link" href="#Analysons-l'image">&#182;</a></h2>
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>$x_1$ et $x_2$ sont les variables d'entrées.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>A chaque variable d'entrée ${x_1,x_2}$ sont associés les poids respectifs $w_1$ et $w_2$.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>$b$ désigne le biais</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>$(z|a)$ sont des fonctions appelé respectivement fonction de <strong>pré-activation</strong> et fonction <strong>d'activation</strong> ils appartiennent à la couche cachée.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>$y$ est la valeur prédite par le perceptron(sortie observée).</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <h1 id="I)-Foward-propagation">I) Foward propagation<a class="anchor-link" href="#I)-Foward-propagation">&#182;</a></h1>
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>La <strong>Foward Propagation</strong> signifie propagation avant.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li><strong>Etape 1:</strong> Calculer la <strong>fonction de pré-activation</strong> $z$.
+        $$ z = x_1*w_1+x_2*w_2 + b $$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li><strong>Etape 2:</strong> Calculer la <strong>fonction d'activation</strong>  $a$.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Il existe plusieurs type de fonction d'activation vous pouvez lire cet article pour en savoir plus <a href="https://deeplylearning.fr/cours-theoriques-deep-learning/fonction-dactivation/">https://deeplylearning.fr/cours-theoriques-deep-learning/fonction-dactivation/</a></li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Dans notre cas la fonction d'activation utilisé sera la fonction <strong>sigmoïde</strong></li>
+        <li>Son ensemble de définition est $Df = [0,1]$ </li>
+        <li>Sa sortie est une probabilité
+        $$ a_{(z)} = \frac{1}{1+e^{-z}} $$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <p>Notons :</p>
+        <ul>
+        <li>$y_{pred}$ la sortie <strong>Observée</strong></li>
+        <li>$y_{vrai}$ la sortie <strong>Attendue</strong></li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>$a_{(z)}$ est en réalité notre $y_{pred}$ donc $a_{(z)} = y_{pred}$ </li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>L'étape 1 et 2 est la <strong>Foward propagation</strong>.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <h2 id="I-1)-Fonction-de-perte">I-1) Fonction de perte<a class="anchor-link" href="#I-1)-Fonction-de-perte">&#182;</a></h2>
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Le terme fonction de perte ou fonction objectif, est utilisé en optimisation mathématique et en recherche opérationnelle pour désigner une fonction qui sert de critère pour déterminer la meilleure solution à un problème d'optimisation. </li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Pour mesurer la performance de notre modèle notre devons avoir un indicateur qui nous indiquera à quel point $y_{pred}$ est proche de $y_{vrai}$.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Si $y_{pred}$ est proche de $y_{vrai}$ on pourra conclut que nous avons un bon modèle, s’ils sont éloignés on pourra conclut que le modèle n'est pas assez performant.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Il nous faut une fonction pour calculer la perte c'est la fonction de cout ou fonction de perte il en existe plusieurs vous pouvez lire cet article pour en savoir plus <a href="https://www.datarobot.com/blog/introduction-to-loss-functions/">https://www.datarobot.com/blog/introduction-to-loss-functions/</a></li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Dans notre exemple la fonction de perte c'est à dire la fonction de calcule d'erreur sera le <strong>Log Loss(Perte d'entropie croisée)</strong>.
+        $$LL = \frac{-1}{m} \sum_{i=1}^m{(y_{vrai}*log(a_{(z)})+(1-y_{vrai})*log(1-a_{(z)}))} $$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <h3 id="I-1)-Expliquons-l'origine-de-la-fonction-de-perte-Log-Loss">I-1) Expliquons l'origine de la fonction de perte Log Loss<a class="anchor-link" href="#I-1)-Expliquons-l'origine-de-la-fonction-de-perte-Log-Loss">&#182;</a></h3>
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Nous avons dit que la fonction d'activation <strong>Sigmoïde</strong> nous renvoie une probabilité donc:
+          $P(y_{pred}=1) = a_{(z)}$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Selon la loi de bernoulli si $P(y_{pred}=1) = a_{(z)}(1)$ alors:
+          $$P(y_{pred}=0) = 1-a_{(z)}(2)$$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Simplifions $(1)$ et $(2)$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <p>La simplification nous donne :
+        $$P(y_{pred}=y_{vrai}) = a_{(z)}^{y_{vrai}}*1-a_{(z)}^{1-y_{vrai}}$$</p>
+        <ul>
+        <li>si $y_{vrai}=1$ on obtient l'expression <strong>1.</strong> </li>
+        <li>si $y_{vrai}=0$ on obtient l'expression <strong>2.</strong></li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <h4 id="a)-Fonction-de-perte-vraisemblance(Likelihood-loss)">a) Fonction de perte vraisemblance(Likelihood loss)<a class="anchor-link" href="#a)-Fonction-de-perte-vraisemblance(Likelihood-loss)">&#182;</a></h4>
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>La fonction de perte <strong>vraisemblance</strong> est une fonction de perte a l'origine du <strong>Log loss</strong>. C'est une fonction simple qui consiste à multiplier toutes les probabilités en généré par notre modèle.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Pour calculer la vraisemblance vous l'aurez deviné il nous suffit de multiplier toute nos probabilités en sorti :
+        $$\prod_{i=1}^m{P(y_{pred}=y_{vrai})} $$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <p>Inconvénient de la perte de vraisemblance :</p>
+        <ul>
+        <li>On multiplie plusieurs nombres décimaux positif inférieur à 1</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Supposons les 4 sorties $y_{pred}$ suivante: $[0.10, 0.10, 0.10, 0.10]$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea">
+        <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div>
+        <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+             <div class="CodeMirror cm-s-jupyter">
+        <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+        <span class="n">a</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.10</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">])</span>
+        <span class="n">a</span><span class="o">.</span><span class="n">prod</span><span class="p">()</span>
+        </pre></div>
+        
+             </div>
+        </div>
+        </div>
+        </div>
+        
+        <div class="jp-Cell-outputWrapper">
+        <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+        </div>
+        
+        
+        <div class="jp-OutputArea jp-Cell-outputArea">
+        
+        <div class="jp-OutputArea-child">
+        
+            
+            <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[2]:</div>
+        
+        
+        
+        
+        <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+        <pre>0.00010000000000000003</pre>
+        </div>
+        
+        </div>
+        
+        </div>
+        
+        </div>
+        
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <p>Nous obtenons un nombre plus petit que $0.10$ qui se rapproche de $0$.</p>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <p>Si nous avons un dataset de million de lignes utiliser cette fonction de perte nous fournira un nombre tellement petit que la mémoire de l'ordinateur ne pourra pas stocker ce nombre.</p>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Pour régler ce problème nous allons utiliser la fonction logarithmique $log$ cette fonction est une fonction monotone croissante et elle garde l'ordre de nos termes.</li>
+        <li>rappel : $log(a*b) = log(a)+log(b)$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Appliquons le logarithme à notre fonction de vraisemblance</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <p>1.$$log(\prod_{i=1}^m{P(y_{pred}=y_{vrai}))}$$
+        2.$$log(\prod_{i=1}^m{a_{(z)}^{y_{vrai}}*1-a_{(z)}^{1-y_{vrai}}})$$
+        3.$$\sum_{i=1}^m{log(A_{(z)}}^{y_{vrai}})+log(1-a_{(z)}^{1-y_{vrai}})$$</p>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>En appliquant le logarithme à notre fonction de vraisemblance nous obtenons :
+        $$\sum_{i=1}^m{log(A_{(z)}}^{y_{vrai}})+log(1-a_{(z)}^{1-y_{vrai}})$$
+        Factorisons l'expression expression précédente</li>
+        <li>rappel : $log(a^b)=b*log(a)$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        $$\sum_{i=1}^m{y_{vrai}*log(a_{(z)}})+{(1-y_{vrai})}*log(1-a_{(z)})$$
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Rappel de notre fonction de perte Log Loss:
+        $$LL = \frac{-1}{m} \sum_{i=1}^m{(y_{vrai}*log(a_{(z)})+(1-y_{vrai})*log(1-a_{(z)}))} $$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Notre objectif est de maximiser la vraisemblance or en mathématique les fonctions de maximisation n’existent pas :</li>
+        <li>maximiser la fonction $f(x)$ revient a minimiser la fonction $-f(x)$ : $$max(f(x)) = min(-f(x))$$</li>
+        <li>donc :
+        $$-\sum_{i=1}^m{y_{vrai}*log(a_{(z)}})+{(1-y_{vrai})}*log(1-a_{(z)})$$</li>
+        <li>et par la suite nous allons ajouter notre coefficient de normalisation $\frac{1}{m}$.</li>
+        <li>nous obtenons $$-\frac{1}{m}\sum_{i=1}^m{y_{vrai}*log(a_{(z)}})+{(1-y_{vrai})}*log(1-a_{(z)})$$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Vous connaissez maintenant l'origine de la fonction de perte <strong>Log Loss</strong>.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <h1 id="II)-Back-propagation">II) Back propagation<a class="anchor-link" href="#II)-Back-propagation">&#182;</a></h1>
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>La back propagation signifie propagation arrière.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Durant cette étape nous allons trouvez les valeurs optimales pour mettre à jour nos paramètres $w_1, w_2$ et $b$.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>L'algorithme utilisé dans cet exemple pour mettre à jour nos paramètres est la <strong>Descente de Gradient</strong>.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>L'objectif de cet algorithme est de trouver comment notre fonction de perte $LL$ varie selon nos paramètres $w_1, w_2$ ,$b$.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Pour ce faire nous devons calculer les dérivés(gradients) suivants:</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ol>
+        <li>$$\frac{\partial LL}{\partial w_1}$$</li>
+        <li>$$\frac{\partial LL}{\partial w_2}$$</li>
+        <li>$$\frac{\partial LL}{\partial b}$$</li>
+        </ol>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>En appliquant le théorème de la dérivation en chaine nous obtenons :</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ol>
+        <li>$$\frac{\partial LL}{\partial w_1}=\frac{\partial LL}{\partial a}*\frac{\partial a}{\partial z}*\frac{\partial z}{\partial w_1}$$</li>
+        <li>$$\frac{\partial LL}{\partial w_2}=\frac{\partial LL}{\partial a}*\frac{\partial a}{\partial z}*\frac{\partial z}{\partial w_2}$$</li>
+        <li>$$\frac{\partial LL}{\partial b}=\frac{\partial LL}{dA}*\frac{\partial a}{\partial z}*\frac{\partial z}{\partial b}$$</li>
+        </ol>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Rappel de notre fonction de perte Log Loss:
+        $$LL = \frac{-1}{m} \sum_{i=1}^m{(y_{vrai}*log(a_{(z)})+(1-y_{vrai})*log(1-a_{(z)}))} $$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <h4 id="d%C3%A9rivons-$$%5Cfrac%7B%5Cpartial-LL%7D%7B%5Cpartial-a%7D$$">d&#233;rivons $$\frac{\partial LL}{\partial a}$$<a class="anchor-link" href="#d%C3%A9rivons-$$%5Cfrac%7B%5Cpartial-LL%7D%7B%5Cpartial-a%7D$$">&#182;</a></h4><ul>
+        <li>rappel $log(x)'=\frac{1}{x}$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        $$\frac{\partial LL}{\partial a} = y_{vrai}*\frac{1}{a}-(1-y_{vrai})*\frac{1}{1-a}$$$$\frac{\partial LL}{\partial a} = \frac{y_{vrai}}{a}-\frac{1-y_{vrai}}{1-a}$$
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <h4 id="d%C3%A9rivons-$$%5Cfrac%7B%5Cpartial-a%7D%7B%5Cpartial-z%7D$$">d&#233;rivons $$\frac{\partial a}{\partial z}$$<a class="anchor-link" href="#d%C3%A9rivons-$$%5Cfrac%7B%5Cpartial-a%7D%7B%5Cpartial-z%7D$$">&#182;</a></h4>
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>On a $$ a = \frac{1}{1+e^{-z}} $$</li>
+        <li>Découpons la fonction $a$ en fonction composée $gof$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>soit $g = \frac{1}{f}$ et $f = 1+e^{-z} $</li>
+        <li>on sait que  $(gof)' = g'f * f'$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ol>
+        <li>$$g'f = -\frac{1}{{(1+e^{-z}})^2}$$</li>
+        <li>$$f' = -e^{-z}$$</li>
+        </ol>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ol>
+        <li>$$(gof)' = \frac{e^{-z}}{({1+e^{-z}})^2}$$</li>
+        </ol>
+        <ul>
+        <li>Factorisons l'expression précédente</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        $$\frac{\partial a}{\partial z} = \frac{e^{-z}}{({1+e^{-z}})^2}=\frac{1}{1+e^{-z}}*\frac{e^{-z}}{1+e^{-z}}$$<ul>
+        <li>or $$\frac{1}{1+e^{-z}}=a$$</li>
+        <li>donc $$\frac{\partial a}{\partial z} = \frac{e^{-z}}{({1+e^{-z}})^2}=a*\frac{e^{-z}}{1+e^{-z}}$$</li>
+        <li>Prenons l'expression $$\frac{e^{-z}}{1+e^{-z}} = \frac{1+e^{-z}}{1+e^{-z}}-\frac{1}{1+e^{-z}}$$
+        $$\frac{e^{-z}}{1+e^{-z}} = 1-a$$</li>
+        <li>nous obtenons en résultat final $$\frac{\partial a}{\partial z} =a*(1-a)$$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <h4 id="d%C3%A9rivons-$$%5Cfrac%7B%5Cpartial-z%7D%7B%5Cpartial-w_1%7D$$">d&#233;rivons $$\frac{\partial z}{\partial w_1}$$<a class="anchor-link" href="#d%C3%A9rivons-$$%5Cfrac%7B%5Cpartial-z%7D%7B%5Cpartial-w_1%7D$$">&#182;</a></h4>
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>on a $$ z = x_1*w_1+x_2*w_2 + b $$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        $$\frac{\partial z}{\partial w_1} = x_1$$
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Nos différentes dérivés sont maintenant calculés.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ol>
+        <li>$$\frac{\partial LL}{\partial w_1}=\frac{\partial LL}{\partial a}*\frac{\partial a}{\partial z}*\frac{\partial z}{\partial w_1}$$</li>
+        </ol>
+        <ul>
+        <li>Remplaçons dans cette formule chaque dérivé par sa valeur</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        $$\frac{\partial LL}{\partial w_1}=(\frac{y_{vrai}}{a}-\frac{1-y_{vrai}}{1-a})*(a*(1-a))*x_1$$<ul>
+        <li>En factorisant cette expression on obtient</li>
+        </ul>
+        $$\frac{\partial LL}{\partial w_1}=(y_{vrai}-a)*x_1$$
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>On peut en déduire que 
+        $$\frac{\partial LL}{\partial w_2}=(y_{vrai}-a)*x_2$$</li>
+        <li>et </li>
+        </ul>
+        $$\frac{\partial LL}{\partial b}=y_{vrai}-a$$
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>en conclusion nos différents gradients seront :
+          $$\frac{\partial LL}{\partial w_1}= \frac{-1}{m} \sum_{i=1}^m{(y_{vrai}-a)*x_1}$$
+          $$\frac{\partial LL}{\partial w_2}= \frac{-1}{m} \sum_{i=1}^m{(y_{vrai}-a)*x_2}$$
+          $$\frac{\partial LL}{\partial b}= \frac{-1}{m} \sum_{i=1}^m{y_{vrai}-a}$$</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <h3 id="Mise-a-jour-des-poids">Mise a jour des poids<a class="anchor-link" href="#Mise-a-jour-des-poids">&#182;</a></h3>
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        $$ w_{k+1} = w_k -  \alpha*\frac{\partial LL}{\partial w_k} $$$$ b_{k+1} = b_k -  \alpha*\frac{\partial LL}{\partial b_k} $$
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <h3 id="On-note-:">On note :<a class="anchor-link" href="#On-note-:">&#182;</a></h3><ul>
+        <li>$w_{k+1}$: le poids corrigé</li>
+        <li>$w_k$: le poids actuel</li>
+        <li>$\alpha$ : le taux d'apprentissage</li>
+        <li>$\frac{\partial LL}{\partial w_k}$ : le gradient du poids actuel</li>
+        <li>$b_{k+1}$: le biais corrigé</li>
+        <li>$b_k$: le biais actuel</li>
+        <li>$\frac{\partial LL}{\partial b_k}$ : le gradient du biais actuel</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>L'entrainement du modèle consiste à répéter l'étape de la <strong>foward propagation</strong> et de la <strong>back propagation</strong> un certain nombre de fois jusqu'à obtenir les paramètres optimales pour $w_1, w_2$ et $b$.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Pour ne pas rendre l'article trop long nous allons nous arrêter là. Dans le prochain article nous allons prendre un cas concret et implémenter le perceptron en <strong>Python</strong>.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <ul>
+        <li>Merci pour la lecture.</li>
+        </ul>
+        
+        </div>
+        </div>
+        </div>
+        </div>
+        <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+        <div class="jp-Cell-inputWrapper">
+        <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+        </div>
+        <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+        </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+        <h6 id="Auteur-:-Oumar-Alpha-Yaya-CISSE">Auteur : Oumar Alpha Yaya CISSE<a class="anchor-link" href="#Auteur-:-Oumar-Alpha-Yaya-CISSE">&#182;</a></h6><h6 id="Linkedin-:-https://www.linkedin.com/in/oumaralphacisse/">Linkedin : <a href="https://www.linkedin.com/in/oumaralphacisse/">https://www.linkedin.com/in/oumaralphacisse/</a><a class="anchor-link" href="#Linkedin-:-https://www.linkedin.com/in/oumaralphacisse/">&#182;</a></h6><h6 id="Github-:-https://github.com/Oumardev">Github : <a href="https://github.com/Oumardev">https://github.com/Oumardev</a><a class="anchor-link" href="#Github-:-https://github.com/Oumardev">&#182;</a></h6>
+        </div>
+        </div>
+        </div>
+        </div>
+    </section>
+
+    <!-- Change the colour #f8fafc to match the previous section colour -->
+    <svg class="wave-top" viewBox="0 0 1439 147" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+      <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(-1.000000, -14.000000)" fill-rule="nonzero">
+          <g class="wave" fill="#f8fafc">
+            <path
+              d="M1440,84 C1383.555,64.3 1342.555,51.3 1317,45 C1259.5,30.824 1206.707,25.526 1169,22 C1129.711,18.326 1044.426,18.475 980,22 C954.25,23.409 922.25,26.742 884,32 C845.122,37.787 818.455,42.121 804,45 C776.833,50.41 728.136,61.77 713,65 C660.023,76.309 621.544,87.729 584,94 C517.525,105.104 484.525,106.438 429,108 C379.49,106.484 342.823,104.484 319,102 C278.571,97.783 231.737,88.736 205,84 C154.629,75.076 86.296,57.743 0,32 L0,0 L1440,0 L1440,84 Z"
+            ></path>
+          </g>
+          <g transform="translate(1.000000, 15.000000)" fill="#FFFFFF">
+            <g transform="translate(719.500000, 68.500000) rotate(-180.000000) translate(-719.500000, -68.500000) ">
+              <path d="M0,0 C90.7283404,0.927527913 147.912752,27.187927 291.910178,59.9119003 C387.908462,81.7278826 543.605069,89.334785 759,82.7326078 C469.336065,156.254352 216.336065,153.6679 0,74.9732496" opacity="0.100000001"></path>
+              <path
+                d="M100,104.708498 C277.413333,72.2345949 426.147877,52.5246657 546.203633,45.5787101 C666.259389,38.6327546 810.524845,41.7979068 979,55.0741668 C931.069965,56.122511 810.303266,74.8455141 616.699903,111.243176 C423.096539,147.640838 250.863238,145.462612 100,104.708498 Z"
+                opacity="0.100000001"
+              ></path>
+              <path d="M1046,51.6521276 C1130.83045,29.328812 1279.08318,17.607883 1439,40.1656806 L1439,120 C1271.17211,77.9435312 1140.17211,55.1609071 1046,51.6521276 Z" opacity="0.200000003"></path>
+            </g>
+          </g>
+        </g>
+      </g>
+    </svg>
+    <section class="container mx-auto text-center py-6 mb-12">
+      <h1 class="w-full my-2 text-5xl font-bold leading-tight text-center text-white">
+        Le percepton
+      </h1>
+      <div class="w-full mb-4">
+        <div class="h-1 mx-auto bg-white w-1/6 opacity-25 my-0 py-0 rounded-t"></div>
+      </div>
+      <h3 class="my-4 text-3xl leading-tight">
+        Télécharger l'article (.ipynb)
+      </h3>
+      <a href="https://www.oumardev.com/getiypnp" class="mx-auto lg:mx-0 hover:underline bg-white text-gray-800 font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out">
+        Telecharger
+      </a>
+    </section>
+    <footer class="p-4 bg-white sm:p-6 dark:bg-gray-800">
+      <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
+      <div class="sm:flex sm:items-center sm:justify-between">
+          <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2022 <a href="https://flowbite.com" class="hover:underline">Oumardev</a>. All Rights Reserved.
+          </span>
+          <div class="flex mt-4 space-x-6 sm:justify-center sm:mt-0">
+              <a href="https://www.facebook.com/CharoDepp" class="text-gray-500 hover:text-gray-900 dark:hover:text-white">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg>
+              </a>
+              <a href="https://www.instagram.com/direct/inbox/" class="text-gray-500 hover:text-gray-900 dark:hover:text-white">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clip-rule="evenodd" /></svg>
+              </a>
+              <a href="https://github.com/Oumardev" class="text-gray-500 hover:text-gray-900 dark:hover:text-white">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /></svg>
+              </a>
+              <a href="http://oumardev.com" class="text-gray-500 hover:text-gray-900 dark:hover:text-white">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c5.51 0 10-4.48 10-10S17.51 2 12 2zm6.605 4.61a8.502 8.502 0 011.93 5.314c-.281-.054-3.101-.629-5.943-.271-.065-.141-.12-.293-.184-.445a25.416 25.416 0 00-.564-1.236c3.145-1.28 4.577-3.124 4.761-3.362zM12 3.475c2.17 0 4.154.813 5.662 2.148-.152.216-1.443 1.941-4.48 3.08-1.399-2.57-2.95-4.675-3.189-5A8.687 8.687 0 0112 3.475zm-3.633.803a53.896 53.896 0 013.167 4.935c-3.992 1.063-7.517 1.04-7.896 1.04a8.581 8.581 0 014.729-5.975zM3.453 12.01v-.26c.37.01 4.512.065 8.775-1.215.25.477.477.965.694 1.453-.109.033-.228.065-.336.098-4.404 1.42-6.747 5.303-6.942 5.629a8.522 8.522 0 01-2.19-5.705zM12 20.547a8.482 8.482 0 01-5.239-1.8c.152-.315 1.888-3.656 6.703-5.337.022-.01.033-.01.054-.022a35.318 35.318 0 011.823 6.475 8.4 8.4 0 01-3.341.684zm4.761-1.465c-.086-.52-.542-3.015-1.659-6.084 2.679-.423 5.022.271 5.314.369a8.468 8.468 0 01-3.655 5.715z" clip-rule="evenodd" /></svg>
+              </a>
+          </div>
+      </div>
+  </footer>
+  </body>
+</html>
